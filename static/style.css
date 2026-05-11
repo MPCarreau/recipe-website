@@ -1,3 +1,6 @@
+
+
+
 body {
   font-family: Arial, sans-serif;
   padding: 40px;
@@ -55,6 +58,11 @@ body {
   line-height: 1.6;
 }
 
+.recipe-left h2 {
+  font-size: 5.2rem;
+  margin-top: 0;
+}
+
 .recipe-middle {
   font-size: 1.1rem;
   line-height: 1.8;
@@ -62,9 +70,7 @@ body {
 
 /*Nav styling*/
 nav {
-    background: var(--deepred);
-
-    
+    background: var(--rgb(155, 44, 36));
 
     text-align: left;
     word-spacing: 5px;
@@ -85,4 +91,21 @@ nav a:hover {
 nav a {
     color: rgb(155, 44, 36);
     text-decoration: none;
+}
+
+/* Serving buttons */
+.serving-buttons {
+  margin-bottom: 20px;
+}
+
+.serving-buttons button {
+  padding: 6px 12px;
+  margin-right: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.serving-buttons button:hover {
+  opacity: 0.8;
 }
