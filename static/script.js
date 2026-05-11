@@ -1,3 +1,36 @@
+
+function formatQuantity(number) {
+
+  if (number === null || number === undefined) {
+    return "";
+  }
+
+  const fractions = {
+    0.25: "1/4",
+    0.5: "1/2",
+    0.75: "3/4"
+  };
+
+  const whole = Math.floor(number);
+  const decimal = Math.round((number - whole) * 100) / 100;
+
+  if (decimal === 0) {
+    return whole.toString();
+  }
+
+  if (fractions[decimal]) {
+
+    if (whole === 0) {
+      return fractions[decimal];
+    }
+
+    return `${whole} ${fractions[decimal]}`;
+  }
+
+  return number.toFixed(2);
+}
+
+
 fetch("/api/recipes")
   .then(response => response.json())
   .then(recipes => {
@@ -9,16 +42,22 @@ fetch("/api/recipes")
       let ingredientsHTML = "";
       let instructionsHTML = "";
 
-      recipe.ingredients.forEach(ingredient => {
-        ingredientsHTML += `
-          <li>
-            ${ingredient.quantity_text || ""}
-            ${ingredient.unit || ""}
-            ${ingredient.name}
-            ${ingredient.optional ? "(optional)" : ""}
-          </li>
-        `;
-      });
+        recipe.ingredients.forEach(ingredient => {
+          ingredientsHTML += `
+            <li>
+              <span 
+                class="ingredient-quantity"
+                data-recipe-id="${recipe.id}"
+                data-base-quantity="${ingredient.quantity}"
+              >
+                ${ingredient.quantity_text || ""}
+              </span>
+              ${ingredient.unit || ""}
+              ${ingredient.name}
+              ${ingredient.optional ? "(optional)" : ""}
+            </li>
+          `;
+        });
 
       recipe.instructions.forEach(instruction => {
         instructionsHTML += `
@@ -54,6 +93,14 @@ fetch("/api/recipes")
             </div>
 
             <div class="recipe-middle">
+
+                <br></br>
+              <div class="serving-buttons">
+                <button onclick="updateIngredients(${recipe.id}, 1)">1x</button>
+                <button onclick="updateIngredients(${recipe.id}, 2)">2x</button>
+                <button onclick="updateIngredients(${recipe.id}, 3)">3x</button>
+              </div>
+
               <h3>Ingredients</h3>
               <ul>
                 ${ingredientsHTML}
@@ -75,3 +122,20 @@ fetch("/api/recipes")
   .catch(error => {
     console.error("Error fetching recipes:", error);
   });
+
+  function updateIngredients(recipeId, multiplier) {
+  const quantities = document.querySelectorAll(
+    `.ingredient-quantity[data-recipe-id="${recipeId}"]`
+  );
+
+  quantities.forEach(quantitySpan => {
+    const baseQuantity = parseFloat(quantitySpan.dataset.baseQuantity);
+
+    if (isNaN(baseQuantity)) {
+      quantitySpan.textContent = "";
+      return;
+    }
+
+    quantitySpan.textContent = formatQuantity(baseQuantity * multiplier);
+  });
+}
