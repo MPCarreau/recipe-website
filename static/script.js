@@ -1,35 +1,45 @@
-
 function formatQuantity(number) {
-
-  if (number === null || number === undefined) {
+  if (number === null || number === undefined || isNaN(number)) {
     return "";
   }
 
-  const fractions = {
-    0.25: "1/4",
-    0.5: "1/2",
-    0.75: "3/4"
-  };
+  const tolerance = 0.03;
+
+  const fractions = [
+    { value: 1 / 4, text: "1/4" },
+    { value: 1 / 3, text: "1/3" },
+    { value: 1 / 2, text: "1/2" },
+    { value: 2 / 3, text: "2/3" },
+    { value: 3 / 4, text: "3/4" }
+  ];
+
+  // makes 0.99 -> 1, 1.99 -> 2, etc.
+  const roundedWhole = Math.round(number);
+
+  if (Math.abs(number - roundedWhole) < tolerance) {
+    return roundedWhole.toString();
+  }
 
   const whole = Math.floor(number);
-  const decimal = Math.round((number - whole) * 100) / 100;
+  const decimal = number - whole;
 
-  if (decimal === 0) {
-    return whole.toString();
-  }
+  for (const fraction of fractions) {
+    if (Math.abs(decimal - fraction.value) < tolerance) {
 
-  if (fractions[decimal]) {
+      if (whole === 0) {
+        return fraction.text;
+      }
 
-    if (whole === 0) {
-      return fractions[decimal];
+      return `${whole} ${fraction.text}`;
     }
-
-    return `${whole} ${fractions[decimal]}`;
   }
 
-  return number.toFixed(2);
-}
+  const rounded = Math.round(number * 100) / 100;
 
+  return Number.isInteger(rounded)
+    ? rounded.toString()
+    : rounded.toString();
+}
 
 fetch("/api/recipes")
   .then(response => response.json())
