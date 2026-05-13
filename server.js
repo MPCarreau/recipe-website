@@ -23,53 +23,76 @@ db.connect((err) => {
   console.log("Connected to MySQL database");
 });
 
-app.get("/api/recipes", (req, res) => {
-  db.query("SELECT * FROM recipes", (err, recipes) => {
-    if (err) {
-      res.status(500).json({ error: "Database error" });
-      return;
-    }
+app.get("/api/recipes/:categorySlug", (req, res) => {
+  const categorySlug = req.params.categorySlug;
 
-    if (recipes.length === 0) {
-      return res.json([]);
-    }
+  db.query(
+    `
+    SELECT recipes.*
+    FROM recipes
+    JOIN categories
+      ON recipes.category_id = categories.id
+    WHERE categories.slug = ?
+    ORDER BY recipes.title ASC
+    `,
+    [categorySlug],
+    (err, recipes) => {
+      if (err) {
+        res.status(500).json({ error: "Database error" });
+        return;
+      }
 
-    let completed = 0;
+      if (recipes.length === 0) {
+        return res.json([]);
+      }
 
-    recipes.forEach(recipe => {
-      db.query(
-        "SELECT * FROM ingredients WHERE recipe_id = ? ORDER BY ingredient_order",
-        [recipe.id],
-        (ingredientErr, ingredients) => {
-          if (ingredientErr) {
-            res.status(500).json({ error: "Ingredient query error" });
-            return;
-          }
+      let completed = 0;
 
-          recipe.ingredients = ingredients;
-
-          db.query(
-            "SELECT * FROM instructions WHERE recipe_id = ? ORDER BY step_number",
-            [recipe.id],
-            (instructionErr, instructions) => {
-              if (instructionErr) {
-                res.status(500).json({ error: "Instruction query error" });
-                return;
-              }
-
-              recipe.instructions = instructions;
-
-              completed++;
-
-              if (completed === recipes.length) {
-                res.json(recipes);
-              }
+      recipes.forEach(recipe => {
+        db.query(
+          "SELECT * FROM ingredients WHERE recipe_id = ? ORDER BY ingredient_order",
+          [recipe.id],
+          (ingredientErr, ingredients) => {
+            if (ingredientErr) {
+              res.status(500).json({ error: "Ingredient query error" });
+              return;
             }
-          );
-        }
-      );
-    });
-  });
+
+            recipe.ingredients = ingredients;
+
+            db.query(
+              "SELECT * FROM instructions WHERE recipe_id = ? ORDER BY step_number",
+              [recipe.id],
+              (instructionErr, instructions) => {
+                if (instructionErr) {
+                  res.status(500).json({ error: "Instruction query error" });
+                  return;
+                }
+
+                recipe.instructions = instructions;
+
+                completed++;
+
+                if (completed === recipes.length) {
+                  res.json(recipes);
+                }
+              }
+            );
+          }
+        );
+      });
+    }
+  );
+});
+
+app.get("/api/check-auth", (req, res) => {
+
+  if (req.session.user) {
+    res.json({ loggedIn: true });
+  } else {
+    res.json({ loggedIn: false });
+  }
+
 });
 
 app.listen(3000, () => {

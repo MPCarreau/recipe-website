@@ -41,7 +41,29 @@ function formatQuantity(number) {
     : rounded.toString();
 }
 
-fetch("/api/recipes")
+
+fetch("navbar.html")
+  .then(response => response.text())
+  .then(data => {
+    document.getElementById("navbar-container").innerHTML = data;
+  });
+
+  /*
+if (userLoggedIn) {
+    navAuth.innerHTML = `
+        <a href="#" id="logout-button">Logout</a>
+    `;
+} else {
+    navAuth.innerHTML = `
+        <a href="login.html">Login</a>
+    `;
+}
+  */
+
+
+const category = document.body.dataset.category;
+
+fetch(`/api/recipes/${category}`)
   .then(response => response.json())
   .then(recipes => {
     const container = document.getElementById("recipe-container");
