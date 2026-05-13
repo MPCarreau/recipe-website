@@ -6,14 +6,20 @@
     <title>Document</title>
 </head>
 <body>
-    <nav>
-             <span><a href="index.html">Home</a> | </span>
-            <span><a href="profile.html">Profile</a> |</span>
-            <span><a href="desserts.html">Desserts</a> |</span>
-            <span><a href="cakes.html">Cakes</a> |</span>
-            <span><a href="login.html">Login </a> |</span>
-           
-    </nav>
+   <script>
+fetch("/api/check-auth")
+  .then(response => response.json())
+  .then(data => {
+
+    if (!data.loggedIn) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    // user is logged in
+    // load favorites page normally
+  });
+</script> 
     
 </body>
 </html>
