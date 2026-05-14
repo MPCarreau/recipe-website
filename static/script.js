@@ -124,10 +124,17 @@ if (category && container) {
       container.innerHTML = "";
 
       recipes.forEach(recipe => {
-        let ingredientsHTML = "";
+         let ingredientsHTML = "";
         let instructionsHTML = "";
 
-        recipe.ingredients.forEach(ingredient => {
+        const imageUrl = recipe.image_url;
+
+        // Sort ingredients so that required ones come first (optional ones at the end)
+        const sortedIngredients = [...recipe.ingredients].sort((a, b) => {
+          return Number(a.optional) - Number(b.optional);
+        });
+
+        sortedIngredients.forEach(ingredient => {
           ingredientsHTML += `
             <li>
               <span 
@@ -139,7 +146,7 @@ if (category && container) {
               </span>
               ${ingredient.unit || ""}
               ${ingredient.name}
-              ${ingredient.optional ? "(optional)" : ""}
+              ${Number(ingredient.optional) === 1 ? "(optional)" : ""}
             </li>
           `;
         });
@@ -151,13 +158,17 @@ if (category && container) {
         });
 
         container.innerHTML += `
-          <div class="recipe-card">
+          <div class="recipe-card" id="recipe-card-${recipe.id}">
             <div class="recipe-content">
 
               <div class="recipe-left">
                 <h2>${recipe.title}</h2>
                 <button class="favorite-button" onclick="saveFavorite(${recipe.id})">
                   Save to Favorites
+                </button>
+
+                <button class="print-button" onclick="printRecipe(${recipe.id})">
+                  Print Recipe
                 </button>
 
                 ${recipe.servings ? `<p><strong>Servings:</strong> ${recipe.servings}</p>` : ""}
@@ -196,7 +207,7 @@ if (category && container) {
 
               <div class="recipe-image">
                 <img 
-                  src="${recipe.image_url}" 
+                  src="${imageUrl}"
                   alt="${recipe.title}"
                 >
               </div>
@@ -278,4 +289,28 @@ function closePopup() {
         popup.remove();
     }
 
+}
+// PRINT RECIPE
+let recipeToPrintId = null;
+
+function printRecipe(recipeId) {
+  recipeToPrintId = recipeId;
+
+  document.body.classList.add("printing-recipe");
+
+  const recipeCard = document.getElementById(`recipe-card-${recipeId}`);
+
+  if (recipeCard) {
+    recipeCard.classList.add("selected-print-recipe");
+  }
+
+  window.print();
+
+  document.body.classList.remove("printing-recipe");
+
+  if (recipeCard) {
+    recipeCard.classList.remove("selected-print-recipe");
+  }
+
+  recipeToPrintId = null;
 }
