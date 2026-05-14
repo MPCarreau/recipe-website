@@ -13,7 +13,6 @@ function formatQuantity(number) {
     { value: 3 / 4, text: "3/4" }
   ];
 
-  // makes 0.99 -> 1, 1.99 -> 2, etc.
   const roundedWhole = Math.round(number);
 
   if (Math.abs(number - roundedWhole) < tolerance) {
@@ -25,7 +24,6 @@ function formatQuantity(number) {
 
   for (const fraction of fractions) {
     if (Math.abs(decimal - fraction.value) < tolerance) {
-
       if (whole === 0) {
         return fraction.text;
       }
@@ -42,37 +40,92 @@ function formatQuantity(number) {
 }
 
 
+
+   // LOAD NAVBAR
+
+
 fetch("navbar.html")
   .then(response => response.text())
   .then(data => {
-    document.getElementById("navbar-container").innerHTML = data;
+    const navbarContainer = document.getElementById("navbar-container");
+
+    if (!navbarContainer) return;
+
+    navbarContainer.innerHTML = data;
+
+    loadNavbarAuth();
+  })
+  .catch(error => {
+    console.error("Error loading navbar:", error);
   });
 
-  /*
-if (userLoggedIn) {
-    navAuth.innerHTML = `
+
+
+  // LOGIN and LOGOUT NAVBAR
+
+
+async function loadNavbarAuth() {
+  const navAuth = document.getElementById("nav-auth");
+
+  if (!navAuth) return;
+
+  try {
+    const response = await fetch("/api/check-auth");
+    const data = await response.json();
+
+    if (data.loggedIn) {
+      navAuth.innerHTML = `
         <a href="#" id="logout-button">Logout</a>
-    `;
-} else {
-    navAuth.innerHTML = `
+      `;
+
+      document
+        .getElementById("logout-button")
+        .addEventListener("click", logoutUser);
+
+    } else {
+      navAuth.innerHTML = `
         <a href="login.html">Login</a>
-    `;
+      `;
+    }
+
+  } catch (error) {
+    console.error("Auth check failed:", error);
+  }
 }
-  */
+
+
+async function logoutUser(event) {
+  event.preventDefault();
+
+  try {
+    await fetch("/api/logout", {
+      method: "POST"
+    });
+
+    window.location.href = "login.html";
+
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+}
+
+
+
+  // LOAD RECIPES BY CATEGORY
 
 
 const category = document.body.dataset.category;
+const container = document.getElementById("recipe-container");
 
-fetch(`/api/recipes/${category}`)
-  .then(response => response.json())
-  .then(recipes => {
-    const container = document.getElementById("recipe-container");
+if (category && container) {
+  fetch(`/api/recipes/${category}`)
+    .then(response => response.json())
+    .then(recipes => {
+      container.innerHTML = "";
 
-    container.innerHTML = "";
-
-    recipes.forEach(recipe => {
-      let ingredientsHTML = "";
-      let instructionsHTML = "";
+      recipes.forEach(recipe => {
+        let ingredientsHTML = "";
+        let instructionsHTML = "";
 
         recipe.ingredients.forEach(ingredient => {
           ingredientsHTML += `
@@ -91,71 +144,78 @@ fetch(`/api/recipes/${category}`)
           `;
         });
 
-      recipe.instructions.forEach(instruction => {
-        instructionsHTML += `
-          <li>${instruction.instruction}</li>
-        `;
-      });
+        recipe.instructions.forEach(instruction => {
+          instructionsHTML += `
+            <li>${instruction.instruction}</li>
+          `;
+        });
 
-      container.innerHTML += `
-        <div class="recipe-card">
-          <div class="recipe-content">
+        container.innerHTML += `
+          <div class="recipe-card">
+            <div class="recipe-content">
 
-            <div class="recipe-left">
-              <h2>${recipe.title}</h2>
+              <div class="recipe-left">
+                <h2>${recipe.title}</h2>
+                <button class="favorite-button" onclick="saveFavorite(${recipe.id})">
+                  Save to Favorites
+                </button>
 
-              <p>${recipe.description || ""}</p>
+                ${recipe.servings ? `<p><strong>Servings:</strong> ${recipe.servings}</p>` : ""}
+                ${recipe.oven_temp_f ? `<p><strong>Oven:</strong> ${recipe.oven_temp_f}°F</p>` : ""}
+                ${recipe.bake_time ? `<p><strong>Bake time:</strong> ${recipe.bake_time}</p>` : ""}
+                ${recipe.pan_size ? `<p><strong>Pan:</strong> ${recipe.pan_size}</p>` : ""}
 
-              ${recipe.servings ? `<p><strong>Servings:</strong> ${recipe.servings}</p>` : ""}
-              ${recipe.oven_temp_f ? `<p><strong>Oven:</strong> ${recipe.oven_temp_f}°F</p>` : ""}
-              ${recipe.bake_time ? `<p><strong>Bake time:</strong> ${recipe.bake_time}</p>` : ""}
-              ${recipe.pan_size ? `<p><strong>Pan:</strong> ${recipe.pan_size}</p>` : ""}
+                <h3>Instructions</h3>
+                <ol>
+                  ${instructionsHTML}
+                </ol>
 
-              <h3>Instructions</h3>
-              <ol>
-                ${instructionsHTML}
-              </ol>
-
-              ${recipe.notes ? `
-                <p>
-                  <strong>Notes:</strong><br>
-                  ${recipe.notes.replace(/\.\s/g, ".<br>")}
-                </p>
-              ` : ""}
-            </div>
-
-            <div class="recipe-middle">
-
-                <br></br>
-              <div class="serving-buttons">
-                <button onclick="updateIngredients(${recipe.id}, 1)">1x</button>
-                <button onclick="updateIngredients(${recipe.id}, 2)">2x</button>
-                <button onclick="updateIngredients(${recipe.id}, 3)">3x</button>
+                ${recipe.notes ? `
+                  <p>
+                    <strong>Notes:</strong><br>
+                    ${recipe.notes.replace(/\.\s/g, ".<br>")}
+                  </p>
+                ` : ""}
               </div>
 
-              <h3>Ingredients</h3>
-              <ul>
-                ${ingredientsHTML}
-              </ul>
-            </div>
+              <div class="recipe-middle">
 
-            <div class="recipe-image">
-              <img 
-                src="${recipe.image_url}" 
-                alt="${recipe.title}"
-              >
-            </div>
+                <br>
 
+                <div class="serving-buttons">
+                  <button onclick="updateIngredients(${recipe.id}, 1)">1x</button>
+                  <button onclick="updateIngredients(${recipe.id}, 2)">2x</button>
+                  <button onclick="updateIngredients(${recipe.id}, 3)">3x</button>
+                </div>
+
+                <h3>Ingredients</h3>
+                <ul>
+                  ${ingredientsHTML}
+                </ul>
+              </div>
+
+              <div class="recipe-image">
+                <img 
+                  src="${recipe.image_url}" 
+                  alt="${recipe.title}"
+                >
+              </div>
+
+            </div>
           </div>
-        </div>
-      `;
+        `;
+      });
+    })
+    .catch(error => {
+      console.error("Error fetching recipes:", error);
     });
-  })
-  .catch(error => {
-    console.error("Error fetching recipes:", error);
-  });
+}
 
-  function updateIngredients(recipeId, multiplier) {
+
+
+// SERVING MULTIPLIER
+
+function updateIngredients(recipeId, multiplier) {
   const quantities = document.querySelectorAll(
     `.ingredient-quantity[data-recipe-id="${recipeId}"]`
   );
@@ -170,4 +230,52 @@ fetch(`/api/recipes/${category}`)
 
     quantitySpan.textContent = formatQuantity(baseQuantity * multiplier);
   });
+}
+
+// FAVORITES
+async function saveFavorite(recipeId) {
+  try {
+    const response = await fetch(`/api/favorites/${recipeId}`, {
+      method: "POST"
+    });
+
+    const data = await response.json();
+
+    if (response.status === 401) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    showPopup(data.message);
+
+  } catch (error) {
+    console.error("Favorite error:", error);
+  }
+}
+
+// Custom Alert Popup
+function showPopup(message) {
+
+    const popup = document.createElement("div");
+
+    popup.classList.add("popup-message");
+
+    popup.innerHTML = `
+        <div class="popup-content">
+            <p>${message}</p>
+            <button onclick="closePopup()">OK</button>
+        </div>
+    `;
+
+    document.body.appendChild(popup);
+}
+
+function closePopup() {
+
+    const popup = document.querySelector(".popup-message");
+
+    if (popup) {
+        popup.remove();
+    }
+
 }

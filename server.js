@@ -23,6 +23,120 @@ db.connect((err) => {
   console.log("Connected to MySQL database");
 });
 
+
+
+// For password hashing and session management
+const bcrypt = require("bcrypt");
+const session = require("express-session");
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(session({
+  secret: "change-this-secret-key",
+  resave: false,
+  saveUninitialized: false
+}));
+
+/* REGISTER */
+app.post("/api/register", async (req, res) => {
+  const { username, email, password } = req.body;
+
+  if (!username || !email || !password) {
+    return res.status(400).json({ success: false, message: "All fields are required." });
+  }
+
+  try {
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    db.query(
+      "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
+      [username, email, passwordHash],
+      (err, result) => {
+        if (err) {
+          return res.status(400).json({
+            success: false,
+            message: "Username or email already exists."
+          });
+        }
+
+        res.json({ success: true, message: "Account created successfully." });
+      }
+    );
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error." });
+  }
+});
+
+
+/* LOGIN */
+app.post("/api/login", (req, res) => {
+  const { username, password } = req.body;
+
+  db.query(
+    "SELECT * FROM users WHERE username = ? OR email = ? LIMIT 1",
+    [username, username],
+    async (err, results) => {
+      if (err) {
+        return res.status(500).json({ success: false, message: "Database error." });
+      }
+
+      if (results.length === 0) {
+        return res.status(401).json({ success: false, message: "Invalid username or password." });
+      }
+
+      const user = results[0];
+      const passwordMatch = await bcrypt.compare(password, user.password_hash);
+
+      if (!passwordMatch) {
+        return res.status(401).json({ success: false, message: "Invalid username or password." });
+      }
+
+      req.session.user = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      };
+
+      res.json({ success: true, message: "Login successful." });
+    }
+  );
+});
+
+
+/* CHECK AUTH */
+app.get("/api/check-auth", (req, res) => {
+  if (req.session.user) {
+    res.json({
+      loggedIn: true,
+      user: req.session.user
+    });
+  } else {
+    res.json({
+      loggedIn: false
+    });
+  }
+});
+
+
+/* LOGOUT */
+app.post("/api/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.json({ success: true, message: "Logged out successfully." });
+  });
+});
+
+
+
+
+
+
+
+
+
+
+// API endpoint to get recipes by category slug
 app.get("/api/recipes/:categorySlug", (req, res) => {
   const categorySlug = req.params.categorySlug;
 
@@ -85,6 +199,7 @@ app.get("/api/recipes/:categorySlug", (req, res) => {
   );
 });
 
+// Authentication check endpoint for client-side use
 app.get("/api/check-auth", (req, res) => {
 
   if (req.session.user) {
@@ -93,6 +208,135 @@ app.get("/api/check-auth", (req, res) => {
     res.json({ loggedIn: false });
   }
 
+});
+
+// API endpoint to get user's favorite recipes
+app.post("/api/favorites/:recipeId", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({
+      success: false,
+      message: "You must be logged in."
+    });
+  }
+
+  const userId = req.session.user.id;
+  const recipeId = req.params.recipeId;
+
+  db.query(
+    "INSERT IGNORE INTO favorites (user_id, recipe_id) VALUES (?, ?)",
+    [userId, recipeId],
+    (err) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Database error."
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Recipe saved to favorites."
+      });
+    }
+  );
+});
+
+// Display favorites on the favorites page
+app.get("/api/favorites", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({
+      success: false,
+      message: "You must be logged in."
+    });
+  }
+
+  const userId = req.session.user.id;
+
+  db.query(
+    `
+    SELECT recipes.*
+    FROM favorites
+    JOIN recipes
+      ON favorites.recipe_id = recipes.id
+    WHERE favorites.user_id = ?
+    ORDER BY recipes.title ASC
+    `,
+    [userId],
+    (err, recipes) => {
+      if (err) {
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      if (recipes.length === 0) {
+        return res.json([]);
+      }
+
+      let completed = 0;
+
+      recipes.forEach(recipe => {
+        db.query(
+          "SELECT * FROM ingredients WHERE recipe_id = ? ORDER BY ingredient_order",
+          [recipe.id],
+          (ingredientErr, ingredients) => {
+            if (ingredientErr) {
+              return res.status(500).json({ error: "Ingredient query error" });
+            }
+
+            recipe.ingredients = ingredients;
+
+            db.query(
+              "SELECT * FROM instructions WHERE recipe_id = ? ORDER BY step_number",
+              [recipe.id],
+              (instructionErr, instructions) => {
+                if (instructionErr) {
+                  return res.status(500).json({ error: "Instruction query error" });
+                }
+
+                recipe.instructions = instructions;
+
+                completed++;
+
+                if (completed === recipes.length) {
+                  res.json(recipes);
+                }
+              }
+            );
+          }
+        );
+      });
+    }
+  );
+});
+
+// Remove Favorites 
+app.delete("/api/favorites/:recipeId", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({
+      success: false,
+      message: "You must be logged in."
+    });
+  }
+
+  const userId = req.session.user.id;
+  const recipeId = req.params.recipeId;
+
+  db.query(
+    "DELETE FROM favorites WHERE user_id = ? AND recipe_id = ?",
+    [userId, recipeId],
+    (err) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Database error."
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Recipe removed from favorites."
+      });
+    }
+  );
 });
 
 app.listen(3000, () => {
