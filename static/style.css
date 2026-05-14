@@ -28,6 +28,8 @@
   font-family: serif;
 
   white-space: nowrap;
+
+  letter-spacing: -1px;
 }
 
 .nav-links {
@@ -47,6 +49,8 @@
   text-transform: uppercase;
 
   white-space: nowrap;
+
+  transition: opacity 0.15s ease;
 }
 
 .nav-links a:hover {
@@ -58,33 +62,59 @@
   font-family: serif;
   text-align: center;
   margin-bottom: 40px;
+
+  letter-spacing: -2px;
 }
 
 body {
   font-family: Arial, sans-serif;
   padding: 30px;
-  background-color: white;
+  background-color: #f8fbfd;
+  color: #111;
 }
 
 /*Recipe styling*/
+
 .recipe-card {
-  background: #cbeafaf3;
-  padding: 25px;
-  margin-bottom: 35px;
-  border-radius: 10px;
+  background: #d8eef8;
+
+  padding: 32px;
+
+  margin-bottom: 38px;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 8px 24px rgba(6, 46, 82, 0.12);
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.recipe-card:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 14px 30px rgba(6, 46, 82, 0.16);
 }
 
 .recipe-content {
   display: grid;
-  grid-template-columns: 1.3fr 1fr 1fr;
-  gap: 25px;
-  align-items: stretch;
+
+  grid-template-columns: 1.25fr 0.9fr 0.95fr;
+
+  gap: 36px;
+
+  align-items: start;
 }
 
 .recipe-text {
   flex: 2;
-  font-size: 1.2rem;
-  line-height: 1.6;
+
+  font-size: 1.15rem;
+
+  line-height: 1.7;
 }
 
 .recipe-text h2 {
@@ -101,35 +131,68 @@ body {
   padding-left: 30px;
 }
 
-.recipe-image {
-  flex: 1;
-  display: flex;
-}
-
-.recipe-image img {
-  max-width: 100%;
-  border-radius: 12px;
-  object-fit: cover;
-}
-
 .recipe-left {
-  font-size: 1.2rem;
-  line-height: 1.6;
+  font-size: 1.12rem;
+  line-height: 1.7;
 }
 
 .recipe-left h2 {
   font-size: 3rem;
+
   margin-top: 0;
+  margin-bottom: 24px;
+
+  letter-spacing: -1px;
+
+  line-height: 1.05;
+}
+
+.recipe-left h3,
+.recipe-middle h3 {
+  font-size: 1.5rem;
+
+  margin-top: 28px;
+  margin-bottom: 14px;
+
+  letter-spacing: -0.3px;
 }
 
 .recipe-middle {
-  font-size: 1.2rem;
+  font-size: 1.12rem;
   line-height: 1.8;
-  
 }
 
+.recipe-middle ul,
+.recipe-left ol {
+  padding-left: 24px;
+}
+
+.recipe-middle li,
+.recipe-left li {
+  margin-bottom: 8px;
+}
+
+.recipe-image {
+  display: flex;
+  align-items: stretch;
+}
+
+.recipe-image img {
+  width: 100%;
+  height: 100%;
+
+  max-height: 520px;
+
+  border-radius: 18px;
+
+  object-fit: cover;
+
+  box-shadow:
+    0 8px 22px rgba(6, 46, 82, 0.18);
+}
 
 /* Serving buttons */
+
 .serving-buttons {
   display: flex;
   gap: 10px;
@@ -143,26 +206,29 @@ body {
   border-radius: 999px;
 
   background: #062e52;
-   color: white;
+  color: white;
 
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
 
   cursor: pointer;
 
-  transition: 
+  transition:
     transform 0.15s ease,
     background 0.15s ease,
     box-shadow 0.15s ease;
 
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow:
+    0 4px 12px rgba(6, 46, 82, 0.22);
 }
 
 .serving-buttons button:hover {
-   background: #446d90;
+  background: #174f78;
+
   transform: translateY(-1px);
 
-  box-shadow: 0 5px 16px rgba(0,0,0,0.18);
+  box-shadow:
+    0 7px 18px rgba(6, 46, 82, 0.25);
 }
 
 .serving-buttons button:active {
@@ -174,123 +240,125 @@ body {
 */
 
 .login-page {
-    min-height: 100vh;
+  min-height: 100vh;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-    background: #f4f4f4;
+  background: #f4f4f4;
 
-    padding: 40px 20px;
+  padding: 40px 20px;
 
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 .login-container {
-    width: 100%;
-    max-width: 400px;
+  width: 100%;
+  max-width: 400px;
 
-    background: white;
+  background: white;
 
-    padding: 40px;
+  padding: 40px;
 
-    border-radius: 12px;
+  border-radius: 16px;
 
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.08);
 
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 .login-container h1 {
-    margin-top: 0;
-    margin-bottom: 30px;
+  margin-top: 0;
+  margin-bottom: 30px;
 
-    text-align: center;
+  text-align: center;
 }
 
 .form-group {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .form-group label {
-    display: block;
+  display: block;
 
-    margin-bottom: 8px;
+  margin-bottom: 8px;
 
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .form-group input {
-    width: 100%;
+  width: 100%;
 
-    padding: 12px;
+  padding: 12px;
 
-    border: 1px solid #ccc;
-    border-radius: 8px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
 
-    font-size: 16px;
+  font-size: 16px;
 
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 .login-container button {
-    width: 100%;
+  width: 100%;
 
-    padding: 14px;
+  padding: 14px;
 
-    border: none;
-    border-radius: 8px;
+  border: none;
+  border-radius: 10px;
 
-    background: black;
-    color: white;
+  background: black;
+  color: white;
 
-    font-size: 16px;
+  font-size: 16px;
 
-    cursor: pointer;
+  cursor: pointer;
 
-    transition: 0.2s;
+  transition: 0.2s;
 }
 
 .login-container button:hover {
-    opacity: 0.9;
+  opacity: 0.9;
 }
 
 .error-message {
-    display: none;
+  display: none;
 
-    margin-top: 15px;
+  margin-top: 15px;
 
-    text-align: center;
+  text-align: center;
 
-    color: red;
+  color: red;
 }
 
 .create-account-btn {
-    margin-top: 12px;
+  margin-top: 12px;
 
-    background: #e5e5e5;
-    color: black;
+  background: #e5e5e5;
+  color: black;
 }
 
 .create-account-btn:hover {
-    background: #d8d8d8;
+  background: #d8d8d8;
 }
 
 .forgot-password-btn {
-    margin-top: 12px;
+  margin-top: 12px;
 
-    background: #e5e5e5;
-    color: black;
+  background: #e5e5e5;
+  color: black;
 }
 
 .forgot-password-btn:hover {
-    background: #d8d8d8;
+  background: #d8d8d8;
 }
 
-
 /* Favorite button styling */
-.favorite-button {
+
+.favorite-button,
+.print-button {
   padding: 12px 22px;
 
   border: none;
@@ -300,7 +368,8 @@ body {
   color: white;
 
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
+
   letter-spacing: 0.5px;
 
   cursor: pointer;
@@ -312,78 +381,72 @@ body {
     background 0.15s ease,
     box-shadow 0.15s ease;
 
-  box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+  box-shadow:
+    0 4px 12px rgba(6, 46, 82, 0.22);
 }
 
-.favorite-button:hover {
-  background: #446d90;
+.print-button {
+  margin-left: 10px;
+}
+
+.favorite-button:hover,
+.print-button:hover {
+  background: #174f78;
+
   transform: translateY(-1px);
 
-  box-shadow: 0 5px 16px rgba(0,0,0,0.18);
+  box-shadow:
+    0 7px 18px rgba(6, 46, 82, 0.25);
 }
 
-.favorite-button:active {
+.favorite-button:active,
+.print-button:active {
   transform: translateY(0);
 }
 
 /* Custom Popup Alert styling */
+
 .popup-message {
-    position: fixed;
-    inset: 0;
+  position: fixed;
+  inset: 0;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-    background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
 
-    z-index: 9999;
+  z-index: 9999;
 }
 
 .popup-content {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
+  background: white;
 
-    min-width: 300px;
+  padding: 30px;
 
-    text-align: center;
+  border-radius: 16px;
 
-    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+  min-width: 300px;
+
+  text-align: center;
+
+  box-shadow:
+    0 0 20px rgba(0,0,0,0.2);
 }
 
 .popup-content button {
-    margin-top: 20px;
-    padding: 10px 18px;
+  margin-top: 20px;
 
-    border: none;
-    border-radius: 8px;
+  padding: 10px 18px;
 
-    cursor: pointer;
-}
-/* Print button styling */
-.print-button {
-  padding: 12px 22px;
   border: none;
-  border-radius: 999px;
-  background: #062e52;
-  color: white;
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  border-radius: 8px;
+
   cursor: pointer;
-  margin-bottom: 24px;
-  margin-left: 10px;
-}
-
-.print-button:hover {
-  background: #446d90;
-  transform: translateY(-1px);
-
-  box-shadow: 0 5px 16px rgba(0,0,0,0.18);
 }
 
 /* Print Styling (print preview) */
+
 @media print {
 
   body {
@@ -401,12 +464,16 @@ body {
 
   body.printing-recipe .selected-print-recipe {
     display: block !important;
+
     position: absolute !important;
+
     top: 0 !important;
     left: 0 !important;
+
     width: 100% !important;
 
     background: white !important;
+
     box-shadow: none !important;
     border: none !important;
 
@@ -428,6 +495,7 @@ body {
 
   body.printing-recipe .selected-print-recipe .recipe-image {
     position: absolute !important;
+
     top: 0 !important;
     right: 0 !important;
 
@@ -443,19 +511,26 @@ body {
     width: 280px !important;
     max-width: 280px !important;
     height: auto !important;
+
     border-radius: 0 !important;
+
+    box-shadow: none !important;
   }
 
   body.printing-recipe .selected-print-recipe .recipe-left h2 {
     font-size: 32pt !important;
+
     margin: 0 0 6px 0 !important;
+
     padding: 0 !important;
+
     line-height: 1 !important;
   }
 
   body.printing-recipe .selected-print-recipe .recipe-left p {
     margin: 0 !important;
     padding: 0 !important;
+
     line-height: 1.2 !important;
   }
 
@@ -471,24 +546,31 @@ body {
   body.printing-recipe .selected-print-recipe .recipe-middle h3 {
     margin: 0 !important;
     padding: 0 !important;
+
     line-height: 1.1 !important;
   }
 
   body.printing-recipe .selected-print-recipe .recipe-middle ul {
     margin: 4px 0 0 0 !important;
+
     padding-left: 25px !important;
+
     line-height: 1.5 !important;
   }
 
   body.printing-recipe .selected-print-recipe .recipe-left h3 {
     margin: 14px 0 4px 0 !important;
+
     padding: 0 !important;
+
     line-height: 1.1 !important;
   }
 
   body.printing-recipe .selected-print-recipe .recipe-left ol {
     margin: 0 !important;
+
     padding-left: 25px !important;
+
     line-height: 1.5 !important;
   }
 
