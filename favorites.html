@@ -55,11 +55,19 @@
 
                     recipe.ingredients?.forEach(ingredient => {
                         ingredientsHTML += `
-                            <li>
+                           <li>
+                              <span 
+                                class="ingredient-quantity"
+                                data-recipe-id="${recipe.id}"
+                                data-base-quantity="${ingredient.quantity}"
+                              >
                                 ${ingredient.quantity_text || ""}
-                                ${ingredient.unit || ""}
-                                ${ingredient.name}
-                                ${ingredient.optional ? "(optional)" : ""}
+                              </span>
+
+                              ${ingredient.unit || ""}
+                              ${ingredient.name}
+                              ${ingredient.optional ? "(optional)" : ""}
+
                             </li>
                         `;
                     });
@@ -71,7 +79,7 @@
                     });
 
                     container.innerHTML += `
-                        <div class="recipe-card">
+                        <div class="recipe-card" id="recipe-card-${recipe.id}">
                             <div class="recipe-content">
 
                                 <div class="recipe-left">
@@ -79,6 +87,10 @@
 
                                     <button class="favorite-button" onclick="removeFavorite(${recipe.id})">
                                         Remove from Favorites
+                                    </button>
+
+                                    <button class="print-button" onclick="printRecipe(${recipe.id})">
+                                      Print Recipe
                                     </button>
 
                                     ${recipe.servings ? `<p><strong>Servings:</strong> ${recipe.servings}</p>` : ""}
@@ -100,7 +112,15 @@
                                 </div>
 
                                 <div class="recipe-middle">
+                                  <br>
+                                    <div class="serving-buttons">
+                                        <button onclick="updateIngredients(${recipe.id}, 1)">1x</button>
+                                        <button onclick="updateIngredients(${recipe.id}, 2)">2x</button>
+                                        <button onclick="updateIngredients(${recipe.id}, 3)">3x</button>
+                                    </div>
+
                                     <h3>Ingredients</h3>
+
                                     <ul>
                                         ${ingredientsHTML}
                                     </ul>
@@ -144,7 +164,33 @@
         console.error("Remove favorite error:", error);
     }
 }
-    </script>
+
+function updateIngredients(recipeId, multiplier) {
+
+  const quantities = document.querySelectorAll(
+    `.ingredient-quantity[data-recipe-id="${recipeId}"]`
+  );
+
+  quantities.forEach(quantitySpan => {
+
+    const baseQuantity = parseFloat(
+      quantitySpan.dataset.baseQuantity
+    );
+
+    if (isNaN(baseQuantity)) {
+      quantitySpan.textContent = "";
+      return;
+    }
+
+    quantitySpan.textContent =
+      formatQuantity(baseQuantity * multiplier);
+
+  });
+
+}
+
+
+</script>
 
 </body>
 </html>
