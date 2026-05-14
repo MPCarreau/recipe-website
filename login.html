@@ -3,17 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Login</title>
+
+    <link rel="stylesheet" href="static/style.css"> 
 </head>
+
 <body>
-    <nav>
-             <span><a href="index.html">Home</a> | </span>
-            <span><a href="favorites.html">Favorites</a> |</span>
-            <span><a href="desserts.html">Desserts</a> |</span>
-            <span><a href="cakes.html">Cakes</a> |</span>
-            <span><a href="login.html">Login </a> |</span>
-           
-    </nav>
+
+    <!-- NAVBAR -->
+    <div id="navbar-container"></div>
+    <script src="static/script.js"></script>
+
+    <!-- LOGIN PAGE -->
+    <main class="login-page">
+
+        <div class="login-container">
+
+            <h1>Login</h1>
+
+            <form id="loginForm">
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                    >
+                </div>
+
+                <button type="submit">
+                    Login
+                </button>
+               
+                <button type="button" class="create-account-btn"
+                    onclick="window.location.href='register.html'">
+
+                        Create Account
+
+                </button>
+
+                 
+                <button type="button" class="forgot-password-btn"
+                    onclick="window.location.href='forgot-password.html'">
+
+                        Forgot Password?
+
+                </button>
+
+                <div class="error-message" id="errorMessage">
+                    Invalid username or password
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
     
+    
+
+    <script>
+
+    const loginForm = document.getElementById("loginForm");
+    const errorMessage = document.getElementById("errorMessage");
+
+    loginForm.addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        errorMessage.style.display = "none";
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        try {
+
+            const response = await fetch("/api/login", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    username,
+                    password
+                })
+
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+
+                window.location.href = "index.html";
+
+            } else {
+
+                errorMessage.textContent = data.message;
+                errorMessage.style.display = "block";
+
+            }
+
+        } catch (error) {
+
+            errorMessage.textContent = "Server error.";
+            errorMessage.style.display = "block";
+
+        }
+
+    });
+
+</script>
+
+   
+
 </body>
 </html>

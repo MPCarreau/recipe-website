@@ -3,23 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Favorites</title>
+
+    <link rel="stylesheet" href="static/style.css"> 
 </head>
+
 <body>
-   <script>
-fetch("/api/check-auth")
-  .then(response => response.json())
-  .then(data => {
 
-    if (!data.loggedIn) {
-      window.location.href = "login.html";
-      return;
+    <div id="navbar-container"></div>
+
+    <div class="page-title">
+        Favorites
+    </div>
+
+    <div id="favorites-container"></div>
+
+    <script src="static/script.js"></script> 
+
+    <script>
+        async function loadFavoritesPage() {
+            try {
+                const authResponse = await fetch("/api/check-auth");
+                const authData = await authResponse.json();
+
+                if (!authData.loggedIn) {
+                    window.location.href = "login.html";
+                    return;
+                }
+
+                const response = await fetch("/api/favorites");
+
+                if (response.status === 401) {
+                    window.location.href = "login.html";
+                    return;
+                }
+
+                const recipes = await response.json();
+
+                const container = document.getElementById("favorites-container");
+
+                container.innerHTML = "";
+
+                if (recipes.length === 0) {
+                    container.innerHTML = "<p>You have no favorite recipes yet.</p>";
+                    return;
+                }
+
+                recipes.forEach(recipe => {
+                    let ingredientsHTML = "";
+                    let instructionsHTML = "";
+
+                    recipe.ingredients?.forEach(ingredient => {
+                        ingredientsHTML += `
+                            <li>
+                                ${ingredient.quantity_text || ""}
+                                ${ingredient.unit || ""}
+                                ${ingredient.name}
+                                ${ingredient.optional ? "(optional)" : ""}
+                            </li>
+                        `;
+                    });
+
+                    recipe.instructions?.forEach(instruction => {
+                        instructionsHTML += `
+                            <li>${instruction.instruction}</li>
+                        `;
+                    });
+
+                    container.innerHTML += `
+                        <div class="recipe-card">
+                            <div class="recipe-content">
+
+                                <div class="recipe-left">
+                                    <h2>${recipe.title}</h2>
+
+                                    <button class="favorite-button" onclick="removeFavorite(${recipe.id})">
+                                        Remove from Favorites
+                                    </button>
+
+                                    ${recipe.servings ? `<p><strong>Servings:</strong> ${recipe.servings}</p>` : ""}
+                                    ${recipe.oven_temp_f ? `<p><strong>Oven:</strong> ${recipe.oven_temp_f}°F</p>` : ""}
+                                    ${recipe.bake_time ? `<p><strong>Bake time:</strong> ${recipe.bake_time}</p>` : ""}
+                                    ${recipe.pan_size ? `<p><strong>Pan:</strong> ${recipe.pan_size}</p>` : ""}
+
+                                    <h3>Instructions</h3>
+                                    <ol>
+                                        ${instructionsHTML}
+                                    </ol>
+
+                                    ${recipe.notes ? `
+                                        <p>
+                                            <strong>Notes:</strong><br>
+                                            ${recipe.notes.replace(/\.\s/g, ".<br>")}
+                                        </p>
+                                    ` : ""}
+                                </div>
+
+                                <div class="recipe-middle">
+                                    <h3>Ingredients</h3>
+                                    <ul>
+                                        ${ingredientsHTML}
+                                    </ul>
+                                </div>
+
+                                <div class="recipe-image">
+                                    <img
+                                        src="${recipe.image_url}"
+                                        alt="${recipe.title}"
+                                    >
+                                </div>
+
+                            </div>
+                        </div>
+                    `;
+                });
+
+            } catch (error) {
+                console.error("Favorites page error:", error);
+            }
+        }
+
+        loadFavoritesPage();
+
+        // Remove a recipe from favorites
+        async function removeFavorite(recipeId) {
+    try {
+        const response = await fetch(`/api/favorites/${recipeId}`, {
+            method: "DELETE"
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            location.reload();
+        } else {
+            showPopup(data.message);
+        }
+
+    } catch (error) {
+        console.error("Remove favorite error:", error);
     }
+}
+    </script>
 
-    // user is logged in
-    // load favorites page normally
-  });
-</script> 
-    
 </body>
 </html>
