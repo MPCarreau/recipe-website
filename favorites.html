@@ -13,9 +13,16 @@
     <div id="navbar-container"></div>
 
     <div class="page-title">
-        Favorites
+        Favorite Recipes
     </div>
-
+        <input
+            type="text"
+            id="favorites-search"
+            list="favorites-suggestions"
+            placeholder="Search favorite recipes..."
+            autocomplete="off"
+            >
+        <datalist id="favorites-suggestions"></datalist>
     <div id="favorites-container"></div>
 
     <script src="static/script.js"></script> 
@@ -53,24 +60,52 @@
                     let ingredientsHTML = "";
                     let instructionsHTML = "";
 
+                   let currentSection = "";
+
                     recipe.ingredients?.forEach(ingredient => {
+
+                        const section = ingredient.section || "";
+
+                        if (section !== currentSection) {
+
+                            if (currentSection !== "") {
+                                ingredientsHTML += `</ul>`;
+                            }
+
+                            if (section !== "") {
+                                ingredientsHTML += `
+                                    <h4 class="ingredient-section">
+                                        ${section}
+                                    </h4>
+                                `;
+                            }
+
+                            ingredientsHTML += `<ul>`;
+
+                            currentSection = section;
+                        }
+
                         ingredientsHTML += `
-                           <li>
-                              <span 
+                        <li>
+                            <span 
                                 class="ingredient-quantity"
                                 data-recipe-id="${recipe.id}"
                                 data-base-quantity="${ingredient.quantity}"
-                              >
+                            >
                                 ${ingredient.quantity_text || ""}
-                              </span>
+                            </span>
 
-                              ${ingredient.unit || ""}
-                              ${ingredient.name}
-                              ${ingredient.optional ? "(optional)" : ""}
+                            ${ingredient.unit || ""}
+                            ${ingredient.name}
+                            ${ingredient.optional ? "(optional)" : ""}
 
                             </li>
                         `;
                     });
+
+                    if (recipe.ingredients?.length > 0) {
+                        ingredientsHTML += `</ul>`;
+                    }
 
                     recipe.instructions?.forEach(instruction => {
                         instructionsHTML += `
@@ -121,9 +156,9 @@
 
                                     <h3>Ingredients</h3>
 
-                                    <ul>
+                                    
                                         ${ingredientsHTML}
-                                    </ul>
+                                    
                                 </div>
 
                                 <div class="recipe-image">
@@ -136,7 +171,67 @@
                             </div>
                         </div>
                     `;
+
+
+
+                    
                 });
+
+                //favorites DataList
+                const favoritesSuggestionList =
+                document.getElementById("favorites-suggestions");
+
+                if (favoritesSuggestionList) {
+
+                favoritesSuggestionList.innerHTML = "";
+
+                recipes.forEach(recipe => {
+
+                    favoritesSuggestionList.innerHTML += `
+                    <option value="${recipe.title}">
+                    `;
+
+                });
+
+                }
+
+                //favorites search functionality
+                const favoritesSearch =
+                document.getElementById("favorites-search");
+
+                if (favoritesSearch) {
+
+                favoritesSearch.addEventListener("input", function () {
+
+                    const searchTerm =
+                    favoritesSearch.value.toLowerCase();
+
+                    const recipeCards =
+                    document.querySelectorAll(".recipe-card");
+
+                    recipeCards.forEach(card => {
+
+                    const title =
+                        card.querySelector("h2")
+                        .textContent
+                        .toLowerCase();
+
+                    if (title.includes(searchTerm)) {
+
+                        card.style.display = "block";
+
+                    } else {
+
+                        card.style.display = "none";
+
+                    }
+
+                    });
+
+                });
+
+                }
+
 
             } catch (error) {
                 console.error("Favorites page error:", error);

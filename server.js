@@ -339,6 +339,31 @@ app.delete("/api/favorites/:recipeId", (req, res) => {
   );
 });
 
+
+// API endpoint to get all recipes for search suggestions
+app.get("/api/all-recipes", (req, res) => {
+  db.query(
+    `
+    SELECT 
+      recipes.id,
+      recipes.title,
+      categories.slug AS category_slug
+    FROM recipes
+    JOIN categories
+      ON recipes.category_id = categories.id
+    ORDER BY recipes.title ASC
+    `,
+    (err, recipes) => {
+      if (err) {
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      res.json(recipes);
+    }
+  );
+});
+
+
 app.listen(3000, () => {
   console.log("Server running at http://localhost:3000");
 });
