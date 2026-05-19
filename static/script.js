@@ -134,22 +134,46 @@ if (category && container) {
           return Number(a.optional) - Number(b.optional);
         });
 
-        sortedIngredients.forEach(ingredient => {
-          ingredientsHTML += `
-            <li>
-              <span 
-                class="ingredient-quantity"
-                data-recipe-id="${recipe.id}"
-                data-base-quantity="${ingredient.quantity}"
-              >
-                ${ingredient.quantity_text || ""}
-              </span>
-              ${ingredient.unit || ""}
-              ${ingredient.name}
-              ${Number(ingredient.optional) === 1 ? "(optional)" : ""}
-            </li>
-          `;
-        });
+        let currentSection = "";
+
+          sortedIngredients.forEach(ingredient => {
+
+            const section = ingredient.section || "";
+
+            if (section !== currentSection) {
+
+              if (currentSection !== "") {
+                ingredientsHTML += `</ul>`;
+              }
+
+              if (section !== "") {
+                ingredientsHTML += `<h4 class="ingredient-section">${section}</h4>`;
+              }
+
+              ingredientsHTML += `<ul>`;
+
+              currentSection = section;
+            }
+
+            ingredientsHTML += `
+              <li>
+                <span 
+                  class="ingredient-quantity"
+                  data-recipe-id="${recipe.id}"
+                  data-base-quantity="${ingredient.quantity}"
+                >
+                  ${ingredient.quantity_text || ""}
+                </span>
+                ${ingredient.unit || ""}
+                ${ingredient.name}
+                ${Number(ingredient.optional) === 1 ? "(optional)" : ""}
+              </li>
+            `;
+          });
+
+          if (sortedIngredients.length > 0) {
+            ingredientsHTML += `</ul>`;
+          }
 
         recipe.instructions.forEach(instruction => {
           instructionsHTML += `
@@ -200,9 +224,7 @@ if (category && container) {
                 </div>
 
                 <h3>Ingredients</h3>
-                <ul>
                   ${ingredientsHTML}
-                </ul>
               </div>
 
               <div class="recipe-image">
@@ -216,12 +238,106 @@ if (category && container) {
           </div>
         `;
       });
+
+
+          const searchInput = document.getElementById("recipe-search");
+
+          if (searchInput) {
+            searchInput.addEventListener("input", function () {
+              const searchTerm = searchInput.value.toLowerCase();
+
+              const recipeCards = document.querySelectorAll(".recipe-card");
+
+              recipeCards.forEach(card => {
+                const title = card.querySelector("h2").textContent.toLowerCase();
+
+                if (title.includes(searchTerm)) {
+                  card.style.display = "block";
+                } else {
+                  card.style.display = "none";
+                }
+              });
+            });
+          }
+
+                const suggestionList = document.getElementById("recipe-suggestions");
+
+                if (suggestionList) {
+                  suggestionList.innerHTML = "";
+
+                  recipes.forEach(recipe => {
+                    suggestionList.innerHTML += `
+                      <option value="${recipe.title}">
+                    `;
+                  });
+}
+
+      const hash = window.location.hash;
+
+        if (hash) {
+
+          setTimeout(() => {
+
+            const target =
+              document.querySelector(hash);
+
+            if (target) {
+
+              const navbarOffset = 120;
+
+              const targetPosition =
+                target.getBoundingClientRect().top + window.scrollY - navbarOffset;
+
+              window.scrollTo({
+                top: targetPosition,
+                behavior: "smooth"
+              });
+
+            }
+
+          }, 100);
+
+        }
+
     })
     .catch(error => {
       console.error("Error fetching recipes:", error);
     });
 }
 
+
+// HOME PAGE SEARCH
+const homeSearch = document.getElementById("home-search");
+const homeSearchResults = document.getElementById("home-search-results");
+
+if (homeSearch && homeSearchResults) {
+  fetch("/api/all-recipes")
+    .then(response => response.json())
+    .then(recipes => {
+      homeSearch.addEventListener("input", () => {
+        const searchTerm = homeSearch.value.toLowerCase().trim();
+
+        homeSearchResults.innerHTML = "";
+
+        if (searchTerm === "") return;
+
+        const matches = recipes.filter(recipe =>
+          recipe.title.toLowerCase().includes(searchTerm)
+        );
+
+        matches.forEach(recipe => {
+          homeSearchResults.innerHTML += `
+            <div 
+              class="home-search-result"
+              onclick="window.location.href='${recipe.category_slug}.html#recipe-card-${recipe.id}'"
+            >
+              ${recipe.title}
+            </div>
+          `;
+        });
+      });
+    });
+}
 
 
 // SERVING MULTIPLIER
@@ -314,3 +430,4 @@ function printRecipe(recipeId) {
 
   recipeToPrintId = null;
 }
+
