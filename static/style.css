@@ -57,7 +57,9 @@
   opacity: 0.7;
 }
 
+/* Page title for each category styling */
 .page-title {
+  padding-top: 20px;
   font-size: 4rem;
   font-family: serif;
   text-align: center;
