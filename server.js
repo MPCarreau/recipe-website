@@ -161,9 +161,15 @@ app.get("/api/recipes/:categorySlug", (req, res) => {
     [categorySlug],
     (err, recipes) => {
       if (err) {
-        res.status(500).json({ error: "Database error" });
-        return;
-      }
+
+          console.error("Recipe category route error:", err);
+
+          return res.status(500).json({
+            error: "Database error",
+            details: err.message
+          });
+
+        }
 
       if (recipes.length === 0) {
         return res.json([]);
