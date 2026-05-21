@@ -436,7 +436,7 @@ app.post("/api/forgot-password", (req, res) => {
             });
           }
 
-            const resetLink = `http://localhost:3000/reset-password.html?token=${token}`;
+            const resetLink = `https://aprecipes.up.railway.app/reset-password.html?token=${token}`;
 
                   transporter.sendMail(
                   {
