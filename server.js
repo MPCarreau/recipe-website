@@ -27,7 +27,9 @@ db.connect((err) => {
 });
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -530,7 +532,7 @@ app.post("/api/reset-password", async (req, res) => {
 
 
 app.listen(3000, () => {
-  console.log("Server running at http://localhost:3000");
+  console.log("Server running at https://aprecipes.up.railway.app");
 });
 
 
