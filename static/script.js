@@ -200,10 +200,12 @@ if (category && container) {
                 ${recipe.bake_time ? `<p><strong>Bake time:</strong> ${recipe.bake_time}</p>` : ""}
                 ${recipe.pan_size ? `<p><strong>Pan:</strong> ${recipe.pan_size}</p>` : ""}
 
-                <h3>Instructions</h3>
-                <ol>
-                  ${instructionsHTML}
-                </ol>
+                 ${instructionsHTML.trim() !== "" ? `
+                  <h3>Instructions</h3>
+                  <ol>
+                    ${instructionsHTML}
+                  </ol>
+                ` : ""}
 
                 ${recipe.notes ? `
                   <p>
@@ -389,8 +391,15 @@ function showPopup(message) {
 
     popup.innerHTML = `
         <div class="popup-content">
+
+            <div class="popup-icon">✓</div>
+
             <p>${message}</p>
-            <button onclick="closePopup()">OK</button>
+
+            <button onclick="closePopup()">
+                OK
+            </button>
+
         </div>
     `;
 
@@ -431,3 +440,109 @@ function printRecipe(recipeId) {
   recipeToPrintId = null;
 }
 
+
+// FORGOT PASSWORD FORM
+
+const forgotPasswordForm =
+  document.getElementById("forgotPasswordForm");
+
+if (forgotPasswordForm) {
+
+  forgotPasswordForm.addEventListener(
+    "submit",
+    async (e) => {
+
+      e.preventDefault();
+
+      const email =
+        document.getElementById("email").value;
+
+      try {
+
+        const response = await fetch(
+          "/api/forgot-password",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              email
+            })
+          }
+        );
+
+        const data = await response.json();
+
+        document.getElementById("message").innerText =
+          data.message;
+
+      } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("message").innerText =
+          "Something went wrong.";
+
+      }
+
+    }
+  );
+
+}
+
+// RESET PASSWORD FORM
+
+const resetPasswordForm =
+  document.getElementById("resetPasswordForm");
+
+if (resetPasswordForm) {
+
+  resetPasswordForm.addEventListener(
+    "submit",
+    async (e) => {
+
+      e.preventDefault();
+
+      const params =
+        new URLSearchParams(window.location.search);
+
+      const token = params.get("token");
+
+      const newPassword =
+        document.getElementById("newPassword").value;
+
+      try {
+
+        const response = await fetch(
+          "/api/reset-password",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              token,
+              newPassword
+            })
+          }
+        );
+
+        const data = await response.json();
+
+        document.getElementById("message").innerText =
+          data.message;
+
+      } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("message").innerText =
+          "Something went wrong.";
+
+      }
+
+    }
+  );
+
+}

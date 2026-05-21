@@ -133,11 +133,12 @@
                                     ${recipe.bake_time ? `<p><strong>Bake time:</strong> ${recipe.bake_time}</p>` : ""}
                                     ${recipe.pan_size ? `<p><strong>Pan:</strong> ${recipe.pan_size}</p>` : ""}
 
+                                   ${instructionsHTML.trim() !== "" ? `
                                     <h3>Instructions</h3>
                                     <ol>
                                         ${instructionsHTML}
                                     </ol>
-
+                                    ` : ""}
                                     ${recipe.notes ? `
                                         <p>
                                             <strong>Notes:</strong><br>

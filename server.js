@@ -2,6 +2,8 @@ const express = require("express");
 const mysql = require("mysql2");
 require("dotenv").config();
 
+const nodemailer = require("nodemailer");
+
 const app = express();
 
 app.use(express.static("."));
@@ -23,6 +25,13 @@ db.connect((err) => {
   console.log("Connected to MySQL database");
 });
 
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
 
 // For password hashing and session management
@@ -364,6 +373,157 @@ app.get("/api/all-recipes", (req, res) => {
 });
 
 
+
+// FORGOT PASSWORD
+const crypto = require("crypto");
+
+app.post("/api/forgot-password", (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      message: "Email is required."
+    });
+  }
+
+  db.query(
+    "SELECT * FROM users WHERE email = ? LIMIT 1",
+    [email],
+    (err, results) => {
+
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Database error."
+        });
+      }
+
+      // Don't reveal if email exists
+      if (results.length === 0) {
+        return res.json({
+          success: true,
+          message: "If that email exists, a reset link has been generated."
+        });
+      }
+
+      const user = results[0];
+
+      const token = crypto.randomBytes(32).toString("hex");
+
+      const expires = new Date(Date.now() + 1000 * 60 * 60);
+
+      db.query(
+        `
+        UPDATE users
+        SET reset_token = ?, reset_token_expires = ?
+        WHERE id = ?
+        `,
+        [token, expires, user.id],
+        (updateErr) => {
+
+          if (updateErr) {
+            return res.status(500).json({
+              success: false,
+              message: "Database error."
+            });
+          }
+
+            const resetLink = `http://localhost:3000/reset-password.html?token=${token}`;
+
+                  transporter.sendMail(
+                  {
+                    from: process.env.EMAIL_USER,
+                    to: email,
+                    subject: "Reset Your Recipe Website Password",
+                    html: `
+                      <h2>Password Reset</h2>
+                      <p>Click the link below to reset your password:</p>
+                      <a href="${resetLink}">${resetLink}</a>
+                      <p>This link expires in 1 hour.</p>
+                    `
+                  },
+                  (emailErr) => {
+                    if (emailErr) {
+                      console.error("Email error:", emailErr);
+
+                      return res.status(500).json({
+                        success: false,
+                        message: "Could not send reset email."
+                      });
+                    }
+
+                    res.json({
+                      success: true,
+                      message: "Password reset email sent."
+                    });
+                  }
+                );
+        }
+      );
+    }
+  );
+});
+
+
+// RESET PASSWORD ENDPOINT
+app.post("/api/reset-password", async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing token or password."
+    });
+  }
+
+  db.query(
+    "SELECT * FROM users WHERE reset_token = ? AND reset_token_expires > NOW() LIMIT 1",
+    [token],
+    async (err, results) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Database error."
+        });
+      }
+
+      if (results.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid or expired reset link."
+        });
+      }
+
+      const user = results[0];
+      const passwordHash = await bcrypt.hash(newPassword, 10);
+
+      db.query(
+        "UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?",
+        [passwordHash, user.id],
+        (updateErr) => {
+          if (updateErr) {
+            return res.status(500).json({
+              success: false,
+              message: "Could not reset password."
+            });
+          }
+
+          res.json({
+            success: true,
+            message: "Password reset successfully. You can now log in."
+          });
+        }
+      );
+    }
+  );
+});
+
+
+
+
 app.listen(3000, () => {
   console.log("Server running at http://localhost:3000");
 });
+
+
