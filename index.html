@@ -3,43 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X Recipes</title>
+    <title>AP Recipes</title>
 
     <link rel="stylesheet" href="static/style.css"> 
-
-
 </head>
+
 <body>
 
-   <div id="navbar-container"></div>
-   
+    <div id="navbar-container"></div>
 
-    
-    <p> 
-        
-       <div class="home-title-container">
-            <h1 class="home-title">
-                Welcome to AP Family Recipes
-            </h1>
-        </div>
+    <main class="home-page">
 
-       
-            <input
-            type="text"
-            id="home-search"
-            placeholder="Search all recipes..."
-            autocomplete="off"
-            >
+        <section class="hero-section">
+
+            
+
+            <div class="hero-box">
+
+             <p>Search through our collection of family recipes</p>
+
+                <input
+                    type="text"
+                    id="home-search"
+                    class="home-search"
+                    placeholder="Search all recipes..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+        </section>
 
         <div id="home-search-results"></div>
 
-        <script src="static/script.js"></script>
+        <section class="recommendation-text">
+            <p>Recommendations</p>
+            
+        </section>
 
-  
+        <section id="categoryGrid" class="category-grid">
 
-     
+                <div class="category-card"
+                    onclick="window.location.href='breakfast.html#recipe-card-63'"
+                    style="background-image: url('static/images/waffles.jpg');">
+                    <h3>Waffles</h3>
+                </div>
 
-     
+                <div class="category-card"
+                    onclick="window.location.href='greek.html#recipe-card-159'"
+                    style="background-image: url('static/images/kourambiedes.jpg');">
+                    <h3>Kourambiedes</h3>
+                </div>
+
+                <div class="category-card"
+                    onclick="window.location.href='meals.html#recipe-card-216'"
+                    style="background-image: url('static/images/meatloaf.jpg');">
+                    <h3>Meatloaf</h3>
+                </div>
+
+                <div class="category-card"
+                    onclick="window.location.href='desserts.html#recipe-card-2'"
+                    style="background-image: url('static/images/fudge-brownies.jpg');">
+                    <h3>Fudge Brownies</h3>
+                </div>
+
+        </section>
+
+    </main>
+
+    <script src="static/script.js"></script>
 
 </body>
 </html>
