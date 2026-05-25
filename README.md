@@ -49,8 +49,6 @@ Live at aprecipes.up.railway.app
 
 ---
 
----
-
 ## API Endpoints
 
 ### Authentication
