@@ -2,6 +2,7 @@
 
 A full-stack recipe management web application built with Node.js, Express, MySQL, and JavaScript.
 
+Live at aprecipes.up.railway.app
 ## Features
 
 - Dynamic recipe rendering from MySQL database
@@ -48,12 +49,58 @@ A full-stack recipe management web application built with Node.js, Express, MySQ
 
 ---
 
-## Authentication Features
+---
 
-- User registration/login
-- Session handling
-- Password reset tokens
-- Email recovery flow
+## API Endpoints
+
+### Authentication
+
+- `POST /api/register` — User registration
+- `POST /api/login` — User login
+- `POST /api/logout` — User logout
+- `POST /api/forgot-password` — Password reset request
+- `POST /api/reset-password` — Reset password
+- `GET /api/check-auth` — Check authentication status
+
+---
+
+### Recipes
+
+- `GET /api/recipes/:category` — Get recipes by category
+- `GET /api/recipe/:id` — Get single recipe
+- `GET /api/search` — Search recipes
+
+---
+
+### Favorites
+
+- `POST /api/favorites/add` — Add recipe to favorites
+- `DELETE /api/favorites/remove/:id` — Remove recipe from favorites
+- `GET /api/favorites` — Get user's favorite recipes
+
+---
+
+### Users
+
+- `GET /api/user-profile` — Get user profile
+- `PUT /api/update-profile` — Update user profile
+
+---
+
+## Deployment
+
+The application is deployed using:
+
+- Railway (Node.js hosting)
+- Railway MySQL database
+- GitHub version control
+
+---
+
+## Screenshots
+
+(Add screenshots here)
+
 
 ---
 
